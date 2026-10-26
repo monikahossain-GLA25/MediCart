@@ -1,0 +1,45 @@
+﻿@model MediCart.DTOs.MedicineForm
+
+<div asp-validation-summary="ModelOnly"
+     class="text-danger"></div>
+
+<div class="mb-3">
+    <label asp-for="Name"></label>
+    <input asp-for="Name" class="form-control" />
+    <span asp-validation-for="Name"
+          class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Manufacturer"></label>
+    <input asp-for="Manufacturer" class="form-control" />
+    <span asp-validation-for="Manufacturer"
+          class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Price"></label>
+    <input asp-for="Price" class="form-control" />
+    <span asp-validation-for="Price"
+          class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="StockQuantity"></label>
+    <input asp-for="StockQuantity"
+           class="form-control" />
+    <span asp-validation-for="StockQuantity"
+          class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="ExpiryDate"></label>
+    <input asp-for="ExpiryDate"
+           type="date" class="form-control" />
+    <span asp-validation-for="ExpiryDate"
+          class="text-danger"></span>
+</div>
+
+<button type="submit" class="btn btn-success">
+    Save
+</button>

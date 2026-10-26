@@ -1,0 +1,64 @@
+﻿@model IEnumerable<MediCart.Models.Medicine>
+
+@{
+    ViewData["Title"] = "Medicine Catalog";
+}
+
+<h2>@ViewBag.Welcome</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+<form asp-action="Index" method="get" class="mb-3">
+    <input name="search" value="@ViewBag.Search"
+           placeholder="Search medicines" />
+    <button type="submit">Search</button>
+</form>
+
+<a asp-action="Create" class="btn btn-primary mb-3">
+    Add Medicine
+</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Manufacturer</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Manufacturer</td>
+                <td>BDT @item.Price</td>
+                <td>@item.StockQuantity</td>
+                <td>
+                    <a asp-action="Details"
+                       asp-route-id="@item.Id">Details</a>
+
+                    <a asp-action="Edit"
+                       asp-route-id="@item.Id">Edit</a>
+
+                    <form asp-action="Delete"
+                          asp-route-id="@item.Id"
+                          method="post"
+                          style="display:inline">
+                        <button type="submit"
+                                class="btn btn-danger btn-sm">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,12 @@
+﻿@model MediCart.DTOs.MedicineForm
+
+@{
+    ViewData["Title"] = "Add Medicine";
+}
+
+<h2>Add Medicine</h2>
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+    <partial name="_MedicineForm" model="Model" />
+</form>
