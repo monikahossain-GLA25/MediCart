@@ -1,10 +1,44 @@
 ﻿@model MediCart.Models.Medicine
+@{ ViewData["Title"] = "Medicine Details"; }
 
-<h2>@Model.Name</h2>
+<style>
+    .medicine-details { max-width:1050px; margin:16px auto 50px; color:#193750; }
+    .medicine-details .banner { padding:35px; border-radius:24px; background:linear-gradient(120deg,#115f88,#17949f 60%,#45bf9d); color:#fff; box-shadow:0 14px 32px #146f9c25; }
+    .medicine-details .banner small { letter-spacing:2px; font-weight:800; text-transform:uppercase; opacity:.82; }
+    .medicine-details .banner h1 { margin:12px 0; font-size:clamp(1.8rem,4vw,2.6rem); font-weight:850; overflow-wrap:anywhere; }
+    .medicine-details .banner p { margin:0; opacity:.9; }
+    .medicine-details .panel { margin-top:22px; padding:31px; background:#fff; border:1px solid #e7eef4; border-radius:21px; box-shadow:0 8px 30px #1839550b; }
+    .medicine-details .panel-title { margin:0 0 22px; font-weight:850; font-size:1.22rem; }
+    .medicine-details .detail-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:17px; }
+    .medicine-details .detail-item { background:#f7fafd; border:1px solid #e8eef6; padding:21px; border-radius:15px; min-width:0; }
+    .medicine-details .detail-item .label { display:block; font-weight:700; color:#8192a5; font-size:.8rem; margin-bottom:10px; }
+    .medicine-details .detail-item .value { color:#1a3953; font-size:1.14rem; font-weight:850; overflow-wrap:anywhere; }
+    .medicine-details .detail-item.price { background:#e9f9f2; border-color:#d3f0e2; } .medicine-details .detail-item.price .value { color:#16896c; }
+    .medicine-details .detail-item.stock { background:#ebf5ff; border-color:#d8eafa; } .medicine-details .detail-item.stock .value { color:#247bbb; }
+    .medicine-details .actions { display:flex; gap:12px; flex-wrap:wrap; margin-top:24px; }
+    .medicine-details .action { padding:12px 19px; text-decoration:none; font-weight:800; border-radius:11px; background:#1b83b9; color:white; }
+    .medicine-details .action.secondary { background:#edf4f9; color:#37657f; }
+    .medicine-details .action:hover { opacity:.88; }
+    @@media(max-width:700px) { .medicine-details .banner { padding:26px 22px; } .medicine-details .panel { padding:22px 18px; } .medicine-details .detail-grid { grid-template-columns:1fr; gap:11px; } }
+</style>
 
-<p>Manufacturer: @Model.Manufacturer</p>
-<p>Price: BDT @Model.Price</p>
-<p>Stock: @Model.StockQuantity</p>
-<p>Expiry Date: @Model.ExpiryDate.ToShortDateString()</p>
-
-<a asp-action="Index">Back to Catalog</a>
+<div class="medicine-details">
+    <header class="banner">
+        <small>MediCart / Medicine Details</small>
+        <h1>💊 @Model.Name</h1>
+        <p>Everything you need to know about this medicine, in one place.</p>
+    </header>
+    <section class="panel">
+        <h2 class="panel-title">Product Overview</h2>
+        <div class="detail-grid">
+            <div class="detail-item"><span class="label">Manufacturer</span><div class="value">@Model.Manufacturer</div></div>
+            <div class="detail-item price"><span class="label">Unit Price</span><div class="value">৳@Model.Price.ToString("N2")</div></div>
+            <div class="detail-item stock"><span class="label">Stock Quantity</span><div class="value">@Model.StockQuantity units</div></div>
+            <div class="detail-item"><span class="label">Expiry Date</span><div class="value">@Model.ExpiryDate.ToShortDateString()</div></div>
+        </div>
+        <div class="actions">
+            <a class="action" asp-controller="Medicine" asp-action="Edit" asp-route-id="@Model.Id">✎ Edit Medicine</a>
+            <a class="action secondary" asp-controller="Medicine" asp-action="Index">← Back to Catalog</a>
+        </div>
+    </section>
+</div>

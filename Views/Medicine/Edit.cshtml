@@ -1,15 +1,37 @@
 ﻿@model MediCart.DTOs.MedicineForm
+@{ ViewData["Title"] = "Edit Medicine"; }
 
-@{
-    ViewData["Title"] = "Edit Medicine";
-}
+<style>
+    .medicine-page { max-width:1050px; margin:16px auto 50px; color:#193750; }
+    .medicine-banner { padding:35px; border-radius:24px; background:linear-gradient(120deg,#294c98,#6869c7 57%,#a28bd8); color:white; box-shadow:0 14px 32px #5e68bb26; }
+    .medicine-banner small { text-transform:uppercase; letter-spacing:2px; font-weight:800; opacity:.8; }
+    .medicine-banner h1 { font-size:clamp(1.8rem,4vw,2.6rem); font-weight:850; margin:12px 0; }
+    .medicine-banner p { margin:0; opacity:.9; }
+    .medicine-card { margin-top:22px; border:1px solid #e6edf4; background:#fff; border-radius:22px; padding:32px; box-shadow:0 8px 30px #1839550a; }
+    .medicine-card h2 { font-size:1.3rem; font-weight:800; margin-bottom:5px; }
+    .medicine-card .hint { color:#74889b; font-size:.88rem; margin-bottom:24px; }
+    .medicine-card label { font-weight:700; color:#465f73; margin-bottom:7px; }
+    .medicine-card input:not([type=hidden]):not([type=checkbox]),.medicine-card select,.medicine-card textarea { max-width:100%; border:1px solid #dae5ef; background:#f8fbfe; border-radius:11px; padding:11px 13px; }
+    .medicine-card input:focus,.medicine-card select:focus,.medicine-card textarea:focus { outline:none; border-color:#9887d6; box-shadow:0 0 0 3px #f0ecfc; }
+    .medicine-card button[type=submit],.medicine-card input[type=submit],.medicine-card .btn-primary { border:0; background:#6865bb; color:white; padding:12px 22px; border-radius:11px; font-weight:800; }
+    .medicine-card .text-danger { color:#c43d55!important; }
+    .medicine-back { display:inline-block; margin-top:21px; font-size:.9rem; text-decoration:none; color:#6368af; font-weight:750; }
+    @@media(max-width:700px) { .medicine-banner { padding:26px 22px; } .medicine-card { padding:23px 18px; border-radius:17px; margin-top:15px; } }
+</style>
 
-<h2>Edit Medicine</h2>
-
-<form asp-action="Edit"
-      asp-route-id="@ViewContext.RouteData.Values["id"]"
-      method="post">
-
-    @Html.AntiForgeryToken()
-    <partial name="_MedicineForm" model="Model" />
-</form>
+<div class="medicine-page">
+    <header class="medicine-banner">
+        <small>MediCart / Inventory Management</small>
+        <h1>✎ Edit Medicine</h1>
+        <p>Update product details, pricing, expiry date and stock information.</p>
+    </header>
+    <section class="medicine-card">
+        <h2>Update Medicine Information</h2>
+        <p class="hint">Review the fields and save your changes.</p>
+        <form asp-controller="Medicine" asp-action="Edit" asp-route-id="@ViewContext.RouteData.Values["id"]" method="post">
+            @Html.AntiForgeryToken()
+            <partial name="_MedicineForm" model="Model" />
+        </form>
+        <a class="medicine-back" asp-controller="Medicine" asp-action="Index">← Back to Medicine Catalog</a>
+    </section>
+</div>
