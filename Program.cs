@@ -1,6 +1,6 @@
 
 using MediCart.Data;
-
+using MediCart.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,7 +17,9 @@ var connectionString = builder.Configuration
 builder.Services.AddDbContext<MedicineDbContext>(
     options => options.UseSqlServer(connectionString));
 
-
+builder.Services.AddScoped<
+    IShopMessageService,
+    ShopMessageService>();
 
 var app = builder.Build();
 
