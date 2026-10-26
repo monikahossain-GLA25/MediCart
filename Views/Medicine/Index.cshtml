@@ -1,64 +1,721 @@
-﻿@model IEnumerable<MediCart.Models.Medicine>
+﻿
+@model IEnumerable<MediCart.Models.Medicine>
 
 @{
     ViewData["Title"] = "Medicine Catalog";
+
+    var medicines = Model?.ToList() ?? new List<MediCart.Models.Medicine>();
+    var totalMedicines = medicines.Count;
+    var totalStock = medicines.Sum(m => m.StockQuantity);
+    var lowStock = medicines.Count(m => m.StockQuantity > 0 && m.StockQuantity <= 10);
+    var inventoryValue = medicines.Sum(m => m.Price * m.StockQuantity);
 }
 
-<h2>@ViewBag.Welcome</h2>
+<style>
+    :root {
+        --primary: #087f5b;
+        --primary-dark: #065f46;
+        --primary-light: #e7f7ef;
+        --ink: #18382f;
+        --muted: #72837e;
+        --border: #e4ece8;
+        --surface: #ffffff;
+        --page-bg: #f5f8f6;
+    }
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["Success"]
+    body {
+        background: var(--page-bg);
+        color: var(--ink);
+    }
+
+    .catalog-container {
+        max-width: 1450px;
+        margin: auto;
+        padding: 14px 0 50px;
+    }
+
+    .catalog-hero {
+        background: linear-gradient(115deg, #075a45, #0f9368);
+        border-radius: 22px;
+        padding: 35px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 24px;
+        box-shadow: 0 12px 30px rgba(7, 90, 69, .14);
+    }
+
+    .catalog-hero::after {
+        content: "✚";
+        position: absolute;
+        font-size: 240px;
+        opacity: .07;
+        right: 40px;
+        top: -88px;
+        pointer-events: none;
+    }
+
+    .hero-eyebrow {
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 2px;
+        font-weight: 700;
+        opacity: .8;
+    }
+
+    .hero-title {
+        font-size: clamp(27px, 4vw, 38px);
+        font-weight: 800;
+        letter-spacing: -.8px;
+        margin: 10px 0 8px;
+    }
+
+    .hero-description {
+        font-size: 14px;
+        opacity: .85;
+        max-width: 570px;
+        margin: 0;
+    }
+
+    .hero-button {
+        position: relative;
+        z-index: 1;
+        background: white;
+        color: var(--primary-dark);
+        border: none;
+        padding: 12px 20px;
+        border-radius: 11px;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: .2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .hero-button:hover {
+        color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(0,0,0,.15);
+    }
+
+    .stat-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 22px;
+        height: 100%;
+        transition: .2s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(20, 60, 40, .07);
+    }
+
+    .stat-label {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+
+    .stat-value {
+        font-size: 27px;
+        font-weight: 800;
+        line-height: 1.2;
+        letter-spacing: -.5px;
+    }
+
+    .stat-caption {
+        color: #87958f;
+        font-size: 11px;
+        margin-top: 8px;
+    }
+
+    .stat-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        font-size: 21px;
+    }
+
+    .icon-green { background: #e5f6eb; }
+    .icon-blue { background: #eaf2ff; }
+    .icon-orange { background: #fff1de; }
+    .icon-purple { background: #f1eaff; }
+
+    .catalog-panel {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 4px 18px rgba(25, 55, 38, .025);
+    }
+
+    .panel-header {
+        padding: 25px 27px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .panel-title {
+        font-size: 19px;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .panel-subtitle {
+        font-size: 12px;
+        color: var(--muted);
+        margin: 5px 0 0;
+    }
+
+    .catalog-search {
+        background: #f9fbfa;
+        border: 1px solid var(--border);
+        border-radius: 11px;
+        padding: 11px 15px;
+        font-size: 13px;
+        outline: none;
+        width: 100%;
+        transition: .2s;
+    }
+
+    .catalog-search:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(8, 127, 91, .1);
+        background: white;
+    }
+
+    .search-button {
+        border: none;
+        color: white;
+        background: var(--primary);
+        border-radius: 10px;
+        padding: 10px 21px;
+        font-weight: 600;
+        font-size: 13px;
+        transition: .2s;
+    }
+
+    .search-button:hover {
+        background: var(--primary-dark);
+    }
+
+    .medicine-table {
+        margin: 0;
+        width: 100%;
+    }
+
+    .medicine-table thead th {
+        background: #f8faf9;
+        color: #64766c;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .7px;
+        font-weight: 700;
+        padding: 17px 20px;
+        border-bottom: 1px solid var(--border);
+        white-space: nowrap;
+    }
+
+    .medicine-table tbody td {
+        padding: 17px 20px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f0f4f1;
+        font-size: 13px;
+    }
+
+    .medicine-table tbody tr:hover {
+        background: #f9fcfa;
+    }
+
+    .medicine-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .medicine-avatar {
+        background: var(--primary-light);
+        color: var(--primary);
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .medicine-name {
+        font-weight: 700;
+        font-size: 13px;
+        color: var(--ink);
+    }
+
+    .medicine-id {
+        color: #9aa7a0;
+        font-size: 11px;
+    }
+
+    .price-text {
+        font-weight: 700;
+        color: #087f5b;
+    }
+
+    .stock-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 7px;
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .stock-good {
+        color: #067647;
+        background: #dcfae6;
+    }
+
+    .stock-low {
+        color: #b54708;
+        background: #fff2d5;
+    }
+
+    .stock-out {
+        color: #b42318;
+        background: #fee9e7;
+    }
+
+    .action-link {
+        display: inline-block;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: white;
+        color: #495d54;
+        padding: 7px 11px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: .2s;
+        cursor: pointer;
+    }
+
+    .action-link:hover {
+        background: var(--primary-light);
+        color: var(--primary);
+        border-color: #c3e6d1;
+    }
+
+    .action-delete:hover {
+        background: #fff0ee;
+        border-color: #ffc9c3;
+        color: #d92d20;
+    }
+
+    .panel-footer {
+        background: #fbfcfb;
+        border-top: 1px solid var(--border);
+        padding: 15px 27px;
+        font-size: 12px;
+        color: var(--muted);
+    }
+
+    .empty-state {
+        padding: 70px 20px;
+        text-align: center;
+    }
+
+    .empty-icon {
+        font-size: 45px;
+        margin-bottom: 15px;
+    }
+
+    .empty-state h5 {
+        font-weight: 700;
+    }
+
+    .empty-state p {
+        color: var(--muted);
+        font-size: 13px;
+    }
+
+    .sort-button {
+        border: none;
+        background: transparent;
+        color: inherit;
+        font-size: inherit;
+        font-weight: inherit;
+        letter-spacing: inherit;
+        text-transform: inherit;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    .sort-button:hover {
+        color: var(--primary);
+    }
+
+    @@media (max-width: 767px) {
+        .catalog-hero { padding: 26px 22px; }
+        .panel-header { padding: 20px; }
+        .medicine-table thead th,
+        .medicine-table tbody td { padding: 13px 15px; }
+        .hero-button { margin-top: 20px; }
+    }
+</style>
+
+<div class="catalog-container">
+
+    <!-- HERO SECTION -->
+    <div class="catalog-hero">
+        <div class="d-flex flex-column flex-md-row
+                    justify-content-between align-items-md-center gap-3">
+            <div>
+                <div class="hero-eyebrow">MediCart / Inventory Management</div>
+
+                <h1 class="hero-title">Medicine Catalog</h1>
+
+                <p class="hero-description">
+                    @(ViewBag.Welcome ?? "Manage your pharmacy inventory")
+                    — keep track of medicines, pricing and stock
+                    availability from one place.
+                </p>
+            </div>
+
+            <a asp-controller="Medicine"
+               asp-action="Create"
+               class="hero-button">
+                <span style="font-size:20px">+</span>
+                Add New Medicine
+            </a>
+        </div>
     </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show
+                    border-0 rounded-3 mb-4" role="alert">
+            <strong>✓ Success!</strong> @TempData["Success"]
+            <button type="button" class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- STATISTICS -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="stat-label">Total Medicines</div>
+                        <div class="stat-value">@totalMedicines</div>
+                        <div class="stat-caption">Catalog entries</div>
+                    </div>
+                    <div class="stat-icon icon-green">💊</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="stat-label">Available Units</div>
+                        <div class="stat-value">
+                            @totalStock.ToString("N0")
+                        </div>
+                        <div class="stat-caption">Units in inventory</div>
+                    </div>
+                    <div class="stat-icon icon-blue">📦</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="stat-label">Low Stock Items</div>
+                        <div class="stat-value" style="color:#e08b18">
+                            @lowStock
+                        </div>
+                        <div class="stat-caption">10 units or fewer</div>
+                    </div>
+                    <div class="stat-icon icon-orange">⚠️</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="stat-label">Inventory Value</div>
+                        <div class="stat-value" style="font-size:23px">
+                            ৳@inventoryValue.ToString("N2")
+                        </div>
+                        <div class="stat-caption">Estimated stock value</div>
+                    </div>
+                    <div class="stat-icon icon-purple">💰</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MEDICINE TABLE -->
+    <div class="catalog-panel">
+
+        <div class="panel-header">
+            <div class="d-flex flex-column flex-lg-row
+                        justify-content-between align-items-lg-center gap-3">
+
+                <div>
+                    <h2 class="panel-title">All Medicines</h2>
+                    <p class="panel-subtitle">
+                        Browse, search and manage your medicine inventory
+                    </p>
+                </div>
+
+                <form asp-controller="Medicine"
+                      asp-action="Index"
+                      method="get"
+                      class="d-flex gap-2"
+                      role="search">
+
+                    <input type="search"
+                           name="search"
+                           id="medicineSearch"
+                           value="@ViewBag.Search"
+                           class="catalog-search"
+                           placeholder="Search medicines..."
+                           aria-label="Search medicines" />
+
+                    <button type="submit" class="search-button">
+                        Search
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table medicine-table" id="medicineTable">
+                <thead>
+                    <tr>
+                        <th>Medicine</th>
+                        <th>Manufacturer</th>
+                        <th>
+                            <button type="button" class="sort-button"
+                                    data-sort="price">
+                                Unit Price ↕
+                            </button>
+                        </th>
+                        <th>
+                            <button type="button" class="sort-button"
+                                    data-sort="stock">
+                                Stock ↕
+                            </button>
+                        </th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="medicineBody">
+                    @foreach (var item in medicines)
+                    {
+                        string statusClass;
+                        string statusText;
+
+                        if (item.StockQuantity <= 0)
+                        {
+                            statusClass = "stock-out";
+                            statusText = "Out of Stock";
+                        }
+                        else if (item.StockQuantity <= 10)
+                        {
+                            statusClass = "stock-low";
+                            statusText = "Low Stock";
+                        }
+                        else
+                        {
+                            statusClass = "stock-good";
+                            statusText = "In Stock";
+                        }
+
+                        <tr class="medicine-row"
+                            data-price="@item.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                            data-stock="@item.StockQuantity">
+
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="medicine-avatar">✚</div>
+
+                                    <div>
+                                        <div class="medicine-name">
+                                            @item.Name
+                                        </div>
+                                        <div class="medicine-id">
+                                            ID #@item.Id
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>@item.Manufacturer</td>
+
+                            <td class="price-text">
+                                ৳@item.Price.ToString("N2")
+                            </td>
+
+                            <td>
+                                <strong>@item.StockQuantity</strong>
+                                <span class="text-muted small">units</span>
+                            </td>
+
+                            <td>
+                                <span class="stock-badge @statusClass">
+                                    @statusText
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="d-flex justify-content-end gap-2">
+
+                                    <a asp-controller="Medicine"
+                                       asp-action="Details"
+                                       asp-route-id="@item.Id"
+                                       class="action-link">
+                                        View
+                                    </a>
+
+                                    <a asp-controller="Medicine"
+                                       asp-action="Edit"
+                                       asp-route-id="@item.Id"
+                                       class="action-link">
+                                        Edit
+                                    </a>
+
+                                    <form asp-controller="Medicine"
+                                          asp-action="Delete"
+                                          asp-route-id="@item.Id"
+                                          method="post"
+                                          class="d-inline delete-form"
+                                          data-name="@item.Name">
+
+                                        <button type="submit"
+                                                class="action-link action-delete">
+                                            Delete
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div id="emptyState" class="empty-state"
+             style="display:@(totalMedicines == 0 ? "block" : "none")">
+            <div class="empty-icon">💊</div>
+            <h5>No medicines found</h5>
+            <p>Try another search or add your first medicine.</p>
+            <a asp-action="Create" class="btn btn-success rounded-3">
+                + Add Medicine
+            </a>
+        </div>
+
+        <div class="panel-footer d-flex justify-content-between">
+            <span id="recordCount">
+                Showing @totalMedicines medicine(s)
+            </span>
+            <span>MediCart Inventory System</span>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const searchInput = document.getElementById("medicineSearch");
+        const tableBody = document.getElementById("medicineBody");
+        const emptyState = document.getElementById("emptyState");
+        const recordCount = document.getElementById("recordCount");
+
+        // Instant filtering of currently loaded records
+        searchInput.addEventListener("input", function () {
+            const keyword = this.value.toLowerCase().trim();
+            const rows = tableBody.querySelectorAll(".medicine-row");
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const name = row.cells[0].textContent.toLowerCase();
+                const manufacturer = row.cells[1].textContent.toLowerCase();
+
+                const match = name.includes(keyword) ||
+                              manufacturer.includes(keyword);
+
+                row.style.display = match ? "" : "none";
+
+                if (match) visibleCount++;
+            });
+
+            recordCount.textContent =
+                `Showing ${visibleCount} medicine(s)`;
+
+            emptyState.style.display =
+                visibleCount === 0 ? "block" : "none";
+        });
+
+        // Sorting on currently loaded records
+        document.querySelectorAll(".sort-button").forEach(button => {
+            button.addEventListener("click", function () {
+                const key = this.dataset.sort;
+                const ascending = this.dataset.ascending !== "true";
+
+                const rows = Array.from(
+                    tableBody.querySelectorAll(".medicine-row")
+                );
+
+                rows.sort((a, b) => {
+                    const aValue = Number(a.dataset[key]);
+                    const bValue = Number(b.dataset[key]);
+
+                    return ascending
+                        ? aValue - bValue
+                        : bValue - aValue;
+                });
+
+                rows.forEach(row => tableBody.appendChild(row));
+                this.dataset.ascending = ascending;
+            });
+        });
+
+        // Delete confirmation
+        document.querySelectorAll(".delete-form").forEach(form => {
+            form.addEventListener("submit", function (event) {
+                const medicineName = this.dataset.name;
+
+                const confirmed = confirm(
+                    `Are you sure you want to delete "${medicineName}"?\n\nThis action cannot be undone.`
+                );
+
+                if (!confirmed) {
+                    event.preventDefault();
+                }
+            });
+        });
+
+    });
+</script>
 }
-
-<form asp-action="Index" method="get" class="mb-3">
-    <input name="search" value="@ViewBag.Search"
-           placeholder="Search medicines" />
-    <button type="submit">Search</button>
-</form>
-
-<a asp-action="Create" class="btn btn-primary mb-3">
-    Add Medicine
-</a>
-
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Manufacturer</th>
-            <th>Price</th>
-            <th>Stock</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Name</td>
-                <td>@item.Manufacturer</td>
-                <td>BDT @item.Price</td>
-                <td>@item.StockQuantity</td>
-                <td>
-                    <a asp-action="Details"
-                       asp-route-id="@item.Id">Details</a>
-
-                    <a asp-action="Edit"
-                       asp-route-id="@item.Id">Edit</a>
-
-                    <form asp-action="Delete"
-                          asp-route-id="@item.Id"
-                          method="post"
-                          style="display:inline">
-                        <button type="submit"
-                                class="btn btn-danger btn-sm">
-                            Delete
-                        </button>
-                    </form>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>

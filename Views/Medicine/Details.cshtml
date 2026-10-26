@@ -1,0 +1,10 @@
+﻿@model MediCart.Models.Medicine
+
+<h2>@Model.Name</h2>
+
+<p>Manufacturer: @Model.Manufacturer</p>
+<p>Price: BDT @Model.Price</p>
+<p>Stock: @Model.StockQuantity</p>
+<p>Expiry Date: @Model.ExpiryDate.ToShortDateString()</p>
+
+<a asp-action="Index">Back to Catalog</a>

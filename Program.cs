@@ -1,4 +1,5 @@
 
+
 using MediCart.Data;
 using MediCart.Services;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +35,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 app.UseAuthorization();
+
+
 
 app.MapControllerRoute(
     name: "default",
